@@ -1,0 +1,71 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import FormularioCliente from '../../components/FormularioCliente.astro';
+
+// Obtener parámetros de la URL para coordenadas
+const url = new URL(Astro.request.url);
+const latitud = url.searchParams.get('lat');
+const longitud = url.searchParams.get('lng');
+---
+
+<Layout title="Nuevo Cliente">
+  <main>
+    <div class="container">
+      <header class="header">
+        <h1>➕ Nuevo Cliente</h1>
+        <a href="/" class="btn-volver">← Volver al Mapa</a>
+      </header>
+
+      <FormularioCliente latitud={latitud} longitud={longitud} />
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e9ecef;
+  }
+
+  .header h1 {
+    color: #333;
+    margin: 0;
+    font-size: 2.5rem;
+  }
+
+  .btn-volver {
+    background-color: #6c757d;
+    color: white;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+  }
+
+  .btn-volver:hover {
+    background-color: #545b62;
+  }
+
+  @media (max-width: 768px) {
+    .header {
+      flex-direction: column;
+      gap: 15px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+    }
+  }
+</style>

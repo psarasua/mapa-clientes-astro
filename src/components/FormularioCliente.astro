@@ -1,0 +1,326 @@
+---
+const { cliente = {}, modoEdicion = false, latitud = null, longitud = null } = Astro.props;
+---
+
+<form id="formCliente" class="formulario-cliente">
+  <div class="campo">
+    <label for="nombre">Nombre *</label>
+    <input 
+      type="text" 
+      id="nombre" 
+      name="nombre" 
+      value={cliente.nombre || ''} 
+      required 
+    />
+  </div>
+
+  <div class="campo">
+    <label for="email">Email</label>
+    <input 
+      type="email" 
+      id="email" 
+      name="email" 
+      value={cliente.email || ''} 
+    />
+  </div>
+
+  <div class="campo">
+    <label for="telefono">Teléfono</label>
+    <input 
+      type="tel" 
+      id="telefono" 
+      name="telefono" 
+      value={cliente.telefono || ''} 
+    />
+  </div>
+
+  <div class="campo">
+    <label for="direccion">Dirección</label>
+    <textarea 
+      id="direccion" 
+      name="direccion" 
+      rows="3"
+    >{cliente.direccion || ''}</textarea>
+  </div>
+
+  <div class="coordenadas">
+    <div class="campo">
+      <label for="latitud">Latitud</label>
+      <input 
+        type="number" 
+        id="latitud" 
+        name="latitud" 
+        step="any" 
+        value={cliente.latitud || latitud || ''} 
+      />
+    </div>
+
+    <div class="campo">
+      <label for="longitud">Longitud</label>
+      <input 
+        type="number" 
+        id="longitud" 
+        name="longitud" 
+        step="any" 
+        value={cliente.longitud || longitud || ''} 
+      />
+    </div>
+  </div>
+
+  <div class="ubicacion-ayuda">
+    <button type="button" id="obtenerUbicacion" class="btn-ubicacion">
+      📍 Obtener mi ubicación
+    </button>
+    <small>O haz clic en el mapa para seleccionar una ubicación</small>
+  </div>
+
+  <div id="mapaSeleccion" class="mapa-seleccion"></div>
+
+  <div class="acciones">
+    <button type="submit" class="btn-guardar">
+      {modoEdicion ? 'Actualizar Cliente' : 'Crear Cliente'}
+    </button>
+    <a href="/" class="btn-cancelar">Cancelar</a>
+  </div>
+</form>
+
+<style>
+  .formulario-cliente {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .campo {
+    margin-bottom: 20px;
+  }
+
+  .campo label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .campo input,
+  .campo textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+
+  .campo input:focus,
+  .campo textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+  }
+
+  .coordenadas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+
+  .ubicacion-ayuda {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .btn-ubicacion {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+
+  .btn-ubicacion:hover {
+    background-color: #218838;
+  }
+
+  .mapa-seleccion {
+    height: 300px;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+
+  .acciones {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .btn-guardar {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .btn-guardar:hover {
+    background-color: #0056b3;
+  }
+
+  .btn-cancelar {
+    background-color: #6c757d;
+    color: white;
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+
+  .btn-cancelar:hover {
+    background-color: #545b62;
+  }
+
+  @media (max-width: 768px) {
+    .coordenadas {
+      grid-template-columns: 1fr;
+    }
+    
+    .acciones {
+      flex-direction: column;
+    }
+  }
+</style>
+
+<script define:vars={{ modoEdicion, cliente }}>
+  let mapaSeleccion;
+  let marcadorSeleccion;
+  let L;
+
+  async function inicializarMapaSeleccion() {
+    // Cargar Leaflet si no está disponible
+    if (!window.L) {
+      const leafletScript = document.createElement('script');
+      leafletScript.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      document.head.appendChild(leafletScript);
+
+      const leafletCSS = document.createElement('link');
+      leafletCSS.rel = 'stylesheet';
+      leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(leafletCSS);
+
+      await new Promise(resolve => {
+        leafletScript.onload = resolve;
+      });
+    }
+
+    L = window.L;
+
+    // Obtener coordenadas iniciales
+    const lat = parseFloat(document.getElementById('latitud').value) || 40.4168;
+    const lng = parseFloat(document.getElementById('longitud').value) || -3.7038;
+
+    // Crear mapa
+    mapaSeleccion = L.map('mapaSeleccion').setView([lat, lng], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(mapaSeleccion);
+
+    // Agregar marcador si hay coordenadas
+    if (document.getElementById('latitud').value && document.getElementById('longitud').value) {
+      marcadorSeleccion = L.marker([lat, lng]).addTo(mapaSeleccion);
+    }
+
+    // Evento para seleccionar ubicación
+    mapaSeleccion.on('click', function(e) {
+      const { lat, lng } = e.latlng;
+      
+      // Remover marcador anterior
+      if (marcadorSeleccion) {
+        mapaSeleccion.removeLayer(marcadorSeleccion);
+      }
+      
+      // Agregar nuevo marcador
+      marcadorSeleccion = L.marker([lat, lng]).addTo(mapaSeleccion);
+      
+      // Actualizar campos
+      document.getElementById('latitud').value = lat.toFixed(6);
+      document.getElementById('longitud').value = lng.toFixed(6);
+    });
+  }
+
+  // Obtener ubicación actual
+  document.getElementById('obtenerUbicacion').addEventListener('click', function() {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        document.getElementById('latitud').value = lat.toFixed(6);
+        document.getElementById('longitud').value = lng.toFixed(6);
+        
+        // Actualizar mapa
+        if (mapaSeleccion) {
+          mapaSeleccion.setView([lat, lng], 15);
+          
+          if (marcadorSeleccion) {
+            mapaSeleccion.removeLayer(marcadorSeleccion);
+          }
+          
+          marcadorSeleccion = L.marker([lat, lng]).addTo(mapaSeleccion);
+        }
+      }, function(error) {
+        alert('Error obteniendo ubicación: ' + error.message);
+      });
+    } else {
+      alert('Geolocalización no disponible en este navegador');
+    }
+  });
+
+  // Manejar envío del formulario
+  document.getElementById('formCliente').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const clienteData = Object.fromEntries(formData.entries());
+    
+    // Convertir coordenadas a números
+    if (clienteData.latitud) clienteData.latitud = parseFloat(clienteData.latitud);
+    if (clienteData.longitud) clienteData.longitud = parseFloat(clienteData.longitud);
+    
+    try {
+      const url = modoEdicion ? `/api/clientes/${cliente.id}` : '/api/clientes';
+      const method = modoEdicion ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(clienteData)
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        alert(result.message || 'Cliente guardado exitosamente');
+        window.location.href = '/';
+      } else {
+        alert('Error: ' + result.error);
+      }
+    } catch (error) {
+      alert('Error: ' + error.message);
+    }
+  });
+
+  // Inicializar cuando se carga la página
+  document.addEventListener('DOMContentLoaded', inicializarMapaSeleccion);
+</script>

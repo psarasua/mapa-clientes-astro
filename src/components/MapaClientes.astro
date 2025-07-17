@@ -1,0 +1,183 @@
+---
+// Componente para mostrar el mapa con clientes
+---
+
+<div id="mapa" class="mapa-container"></div>
+
+<style>
+  .mapa-container {
+    height: 500px;
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+</style>
+
+<script>
+  // Importar Leaflet de forma dinámica
+  let L;
+  let mapa;
+  let marcadores = [];
+
+  async function inicializarMapa() {
+    // Cargar Leaflet de CDN
+    if (!window.L) {
+      const leafletScript = document.createElement('script');
+      leafletScript.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      document.head.appendChild(leafletScript);
+
+      const leafletCSS = document.createElement('link');
+      leafletCSS.rel = 'stylesheet';
+      leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(leafletCSS);
+
+      // Esperar a que se cargue
+      await new Promise(resolve => {
+        leafletScript.onload = resolve;
+      });
+    }
+
+    L = window.L;
+
+    // Crear el mapa centrado en España
+    mapa = L.map('mapa').setView([40.4168, -3.7038], 6);
+
+    // Añadir tiles de OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(mapa);
+
+    // Cargar clientes
+    await cargarClientes();
+  }
+
+  async function cargarClientes() {
+    try {
+      const response = await fetch('/api/clientes');
+      const result = await response.json();
+
+      if (result.success) {
+        mostrarClientesEnMapa(result.data);
+      } else {
+        console.error('Error cargando clientes:', result.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+  function mostrarClientesEnMapa(clientes) {
+    // Limpiar marcadores existentes
+    marcadores.forEach(marcador => mapa.removeLayer(marcador));
+    marcadores = [];
+
+    clientes.forEach(cliente => {
+      if (cliente.latitud && cliente.longitud) {
+        const marcador = L.marker([cliente.latitud, cliente.longitud])
+          .addTo(mapa)
+          .bindPopup(`
+            <div class="popup-cliente">
+              <h3>${cliente.nombre}</h3>
+              <p><strong>Email:</strong> ${cliente.email || 'No especificado'}</p>
+              <p><strong>Teléfono:</strong> ${cliente.telefono || 'No especificado'}</p>
+              <p><strong>Dirección:</strong> ${cliente.direccion || 'No especificada'}</p>
+              <div class="popup-acciones">
+                <button onclick="editarCliente(${cliente.id})" class="btn-editar">Editar</button>
+                <button onclick="eliminarCliente(${cliente.id})" class="btn-eliminar">Eliminar</button>
+              </div>
+            </div>
+          `);
+
+        marcadores.push(marcador);
+      }
+    });
+
+    // Ajustar vista si hay marcadores
+    if (marcadores.length > 0) {
+      const grupo = new L.featureGroup(marcadores);
+      mapa.fitBounds(grupo.getBounds().pad(0.1));
+    }
+  }
+
+  // Funciones globales para los botones del popup
+  window.editarCliente = function(id) {
+    window.location.href = `/clientes/editar/${id}`;
+  };
+
+  window.eliminarCliente = async function(id) {
+    if (confirm('¿Estás seguro de que quieres eliminar este cliente?')) {
+      try {
+        const response = await fetch(`/api/clientes/${id}`, {
+          method: 'DELETE'
+        });
+        const result = await response.json();
+
+        if (result.success) {
+          alert('Cliente eliminado exitosamente');
+          await cargarClientes(); // Recargar clientes
+        } else {
+          alert('Error al eliminar cliente: ' + result.error);
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    }
+  };
+
+  // Función para agregar cliente haciendo clic en el mapa
+  window.agregarClienteEnMapa = function() {
+    alert('Haz clic en el mapa para agregar un nuevo cliente');
+    mapa.once('click', function(e) {
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
+      window.location.href = `/clientes/nuevo?lat=${lat}&lng=${lng}`;
+    });
+  };
+
+  // Inicializar cuando se carga la página
+  document.addEventListener('DOMContentLoaded', inicializarMapa);
+</script>
+
+<style is:global>
+  .popup-cliente h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+  }
+  
+  .popup-cliente p {
+    margin: 5px 0;
+    font-size: 14px;
+  }
+  
+  .popup-acciones {
+    margin-top: 10px;
+    display: flex;
+    gap: 5px;
+  }
+  
+  .btn-editar, .btn-eliminar {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  
+  .btn-editar {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .btn-eliminar {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .btn-editar:hover {
+    background-color: #0056b3;
+  }
+  
+  .btn-eliminar:hover {
+    background-color: #c82333;
+  }
+</style>

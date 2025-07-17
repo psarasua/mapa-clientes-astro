@@ -22,3 +22,11 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Database files (opcional - incluir BD vacía)
+data/*.db-wal
+data/*.db-shm
+
+# VS Code (mantener tasks.json)
+.vscode/
+!.vscode/tasks.json
