@@ -8,17 +8,32 @@
     "preview": "astro preview",
     "astro": "astro",
     "init-db": "node scripts/init-db.js",
-    "seed": "node scripts/seed-db.js",
-    "seed:reset": "node scripts/seed-db.js --reset",
-    "seed:clean": "node scripts/seed-db.js --clean",
+    "create:all": "node scripts/create/all-tables.js",
+    "seed:clientes": "node scripts/seed/clientes.js",
+    "seed:clientes:reset": "node scripts/clean/clientes.js && node scripts/seed/clientes.js",
+    "seed:clientes:clean": "node scripts/clean/clientes.js",
+    "seed:dias": "node scripts/seed/dias-entrega.js",
+    "seed:dias:reset": "node scripts/clean/dias-entrega.js && node scripts/seed/dias-entrega.js",
+    "seed:dias:clean": "node scripts/clean/dias-entrega.js",
+    "seed:camiones": "node scripts/seed/camiones.js",
+    "seed:camiones:reset": "node scripts/clean/camiones.js && node scripts/seed/camiones.js",
+    "seed:camiones:clean": "node scripts/clean/camiones.js",
+    "seed:repartos": "node scripts/seed/repartos.js",
+    "seed:repartos:reset": "node scripts/clean/repartos.js && node scripts/seed/repartos.js",
+    "seed:repartos:clean": "node scripts/clean/repartos.js",
     "start": "npm run init-db && npm run dev",
     "setup": "npm run init-db && npm run seed"
   },
   "dependencies": {
     "@astrojs/node": "^9.3.0",
+    "@astrojs/tailwind": "^6.0.2",
     "astro": "^5.12.0",
     "better-sqlite3": "^12.2.0",
     "dotenv": "^17.2.0",
-    "leaflet": "^1.9.4"
+    "leaflet": "^1.9.4",
+    "tailwindcss": "^3.4.17"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.16"
   }
 }

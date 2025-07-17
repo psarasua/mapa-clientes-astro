@@ -1,0 +1,269 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+---
+
+<Layout title="Días de Entrega - Gestión de Clientes">
+  <Navigation />
+  
+  <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="px-4 py-6 sm:px-0">
+      <!-- Header -->
+      <div class="md:flex md:items-center md:justify-between mb-6">
+        <div class="flex-1 min-w-0">
+          <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+            📅 Días de Entrega
+          </h2>
+          <p class="mt-1 text-sm text-gray-500">
+            Gestiona los días disponibles para repartos
+          </p>
+        </div>
+        <div class="mt-4 flex md:mt-0 md:ml-4">
+          <button
+            id="btn-nuevo-dia"
+            class="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+          >
+            ➕ Nuevo Día
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de Días -->
+      <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <div class="px-4 py-5 sm:p-6">
+          <div id="dias-lista" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div class="animate-pulse">
+              <div class="h-32 bg-gray-200 rounded-lg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal para Nuevo/Editar Día -->
+  <div id="modal-dia" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+      </div>
+      
+      <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <form id="form-dia">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="modal-title">
+              Nuevo Día de Entrega
+            </h3>
+            
+            <div class="mb-4">
+              <label for="dia-nombre" class="block text-sm font-medium text-gray-700">
+                Día de la Semana
+              </label>
+              <select
+                id="dia-nombre"
+                required
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+              >
+                <option value="">Selecciona un día</option>
+                <option value="Lunes">Lunes</option>
+                <option value="Martes">Martes</option>
+                <option value="Miércoles">Miércoles</option>
+                <option value="Jueves">Jueves</option>
+                <option value="Viernes">Viernes</option>
+                <option value="Sábado">Sábado</option>
+                <option value="Domingo">Domingo</option>
+              </select>
+            </div>
+            
+            <div class="mb-4">
+              <label for="dia-descripcion" class="block text-sm font-medium text-gray-700">
+                Descripción (opcional)
+              </label>
+              <input
+                type="text"
+                id="dia-descripcion"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                placeholder="Ej: Zona Norte y Centro"
+              />
+            </div>
+          </div>
+          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button
+              type="submit"
+              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm"
+            >
+              Guardar
+            </button>
+            <button
+              type="button"
+              id="btn-cancelar"
+              class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  let diaEditando = null;
+
+  const emojisDiv = {
+    'Lunes': '🌙',
+    'Martes': '🔥',
+    'Miércoles': '🌿',
+    'Jueves': '⚡',
+    'Viernes': '🎉',
+    'Sábado': '🌞',
+    'Domingo': '☀️'
+  };
+
+  async function cargarDias() {
+    try {
+      const response = await fetch('/api/dias-entrega');
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        const lista = document.getElementById('dias-lista');
+        lista.innerHTML = '';
+        
+        if (result.data.length === 0) {
+          lista.innerHTML = `
+            <div class="col-span-full text-center py-8 text-gray-500">
+              <p class="text-lg">No hay días de entrega configurados</p>
+              <button onclick="abrirModal()" class="mt-2 text-purple-600 hover:text-purple-500">
+                Agregar el primer día
+              </button>
+            </div>
+          `;
+          return;
+        }
+        
+        result.data.forEach(dia => {
+          const diaElement = document.createElement('div');
+          diaElement.className = 'bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-4 hover:shadow-md transition-shadow';
+          diaElement.innerHTML = `
+            <div class="flex items-center justify-between mb-3">
+              <div class="text-3xl">${emojisDiv[dia.nombre] || '📅'}</div>
+              <div class="flex space-x-2">
+                <button 
+                  onclick="editarDia(${dia.id}, '${dia.nombre}', '${dia.descripcion || ''}')"
+                  class="text-blue-600 hover:text-blue-900 text-sm"
+                >
+                  ✏️
+                </button>
+                <button 
+                  onclick="eliminarDia(${dia.id})"
+                  class="text-red-600 hover:text-red-900 text-sm"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+            <h4 class="text-lg font-medium text-gray-900 mb-2">${dia.nombre}</h4>
+            ${dia.descripcion ? `<p class="text-sm text-gray-600 mb-2">${dia.descripcion}</p>` : ''}
+            <p class="text-xs text-gray-400">
+              ID: ${dia.id}
+            </p>
+          `;
+          lista.appendChild(diaElement);
+        });
+      }
+    } catch (error) {
+      console.error('Error cargando días:', error);
+      document.getElementById('dias-lista').innerHTML = `
+        <div class="col-span-full text-center py-8 text-red-500">
+          Error cargando días de entrega. Inténtalo de nuevo.
+        </div>
+      `;
+    }
+  }
+
+  function abrirModal(id = null, nombre = '', descripcion = '') {
+    diaEditando = id;
+    document.getElementById('modal-title').textContent = id ? 'Editar Día de Entrega' : 'Nuevo Día de Entrega';
+    document.getElementById('dia-nombre').value = nombre;
+    document.getElementById('dia-descripcion').value = descripcion;
+    document.getElementById('modal-dia').classList.remove('hidden');
+  }
+
+  function cerrarModal() {
+    diaEditando = null;
+    document.getElementById('modal-dia').classList.add('hidden');
+    document.getElementById('form-dia').reset();
+  }
+
+  async function guardarDia(event) {
+    event.preventDefault();
+    
+    const nombre = document.getElementById('dia-nombre').value;
+    const descripcion = document.getElementById('dia-descripcion').value;
+    
+    const method = diaEditando ? 'PUT' : 'POST';
+    const url = diaEditando ? `/api/dias-entrega/${diaEditando}` : '/api/dias-entrega';
+    
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nombre, descripcion })
+      });
+      
+      if (response.ok) {
+        cerrarModal();
+        cargarDias();
+      } else {
+        alert('Error al guardar el día');
+      }
+    } catch (error) {
+      console.error('Error guardando día:', error);
+      alert('Error al guardar el día');
+    }
+  }
+
+  function editarDia(id, nombre, descripcion) {
+    abrirModal(id, nombre, descripcion);
+  }
+
+  async function eliminarDia(id) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este día de entrega?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/dias-entrega/${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        cargarDias();
+      } else {
+        alert('Error al eliminar el día');
+      }
+    } catch (error) {
+      console.error('Error eliminando día:', error);
+      alert('Error al eliminar el día');
+    }
+  }
+
+  // Event listeners
+  document.addEventListener('DOMContentLoaded', () => {
+    cargarDias();
+    
+    document.getElementById('btn-nuevo-dia').addEventListener('click', () => abrirModal());
+    document.getElementById('btn-cancelar').addEventListener('click', cerrarModal);
+    document.getElementById('form-dia').addEventListener('submit', guardarDia);
+    
+    // Cerrar modal al hacer clic fuera
+    document.getElementById('modal-dia').addEventListener('click', (e) => {
+      if (e.target.id === 'modal-dia') {
+        cerrarModal();
+      }
+    });
+  });
+</script>

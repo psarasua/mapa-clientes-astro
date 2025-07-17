@@ -4,7 +4,7 @@ import { executeQuery } from './database.js';
 export function obtenerClientes() {
   try {
     const result = executeQuery(`
-      SELECT id, nombre, email, telefono, direccion, latitud, longitud, 
+      SELECT id, nombre, email, telefono, direccion, latitud, longitud,
              fecha_creacion, fecha_actualizacion 
       FROM clientes 
       ORDER BY fecha_creacion DESC
@@ -59,7 +59,6 @@ export function actualizarCliente(id, cliente) {
       WHERE id = ?
     `, [nombre, email, telefono, direccion, latitud, longitud, id]);
     
-    // Obtener el cliente actualizado
     return obtenerClientePorId(id);
   } catch (error) {
     console.error('Error actualizando cliente:', error);
@@ -70,7 +69,6 @@ export function actualizarCliente(id, cliente) {
 // Eliminar cliente
 export function eliminarCliente(id) {
   try {
-    // Primero obtener el cliente antes de eliminarlo
     const cliente = obtenerClientePorId(id);
     
     if (cliente) {
@@ -84,20 +82,22 @@ export function eliminarCliente(id) {
   }
 }
 
-// Buscar clientes por proximidad geográfica (fórmula de Haversine)
+// Buscar clientes cercanos usando fórmula de haversine
 export function buscarClientesCercanos(latitud, longitud, radio = 10) {
   try {
     const result = executeQuery(`
       SELECT *, 
-        (6371 * acos(cos(radians(?)) * cos(radians(latitud)) * 
-        cos(radians(longitud) - radians(?)) + sin(radians(?)) * 
-        sin(radians(latitud)))) AS distancia
-      FROM clientes
+        (6371 * acos(
+          cos(radians(?)) * cos(radians(latitud)) * 
+          cos(radians(longitud) - radians(?)) + 
+          sin(radians(?)) * sin(radians(latitud))
+        )) AS distancia
+      FROM clientes 
       WHERE latitud IS NOT NULL AND longitud IS NOT NULL
-      ORDER BY distancia
+      ORDER BY distancia ASC
     `, [latitud, longitud, latitud]);
     
-    // Filtrar por radio después de calcular distancias
+    // Filtrar por radio
     const clientesCercanos = result.rows.filter(cliente => cliente.distancia <= radio);
     
     return clientesCercanos;

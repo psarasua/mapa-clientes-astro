@@ -1,0 +1,148 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import MapaClientes from '../components/MapaClientes.astro';
+---
+
+<Layout title="Clientes - Gestión de Clientes">
+  <Navigation />
+  
+  <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="px-4 py-6 sm:px-0">
+      <!-- Header -->
+      <div class="md:flex md:items-center md:justify-between mb-6">
+        <div class="flex-1 min-w-0">
+          <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+            👥 Clientes
+          </h2>
+          <p class="mt-1 text-sm text-gray-500">
+            Gestiona la información de tus clientes y visualiza sus ubicaciones
+          </p>
+        </div>
+        <div class="mt-4 flex md:mt-0 md:ml-4">
+          <a
+            href="/clientes/nuevo"
+            class="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            ➕ Nuevo Cliente
+          </a>
+        </div>
+      </div>
+
+      <!-- Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Lista de Clientes -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-md">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+              Lista de Clientes
+            </h3>
+            <div id="clientes-lista" class="space-y-3">
+              <div class="animate-pulse">
+                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mapa -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-md">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+              Ubicaciones en el Mapa
+            </h3>
+            <MapaClientes />
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  async function cargarClientes() {
+    try {
+      const response = await fetch('/api/clientes');
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        const lista = document.getElementById('clientes-lista');
+        lista.innerHTML = '';
+        
+        if (result.data.length === 0) {
+          lista.innerHTML = `
+            <div class="text-center py-4 text-gray-500">
+              <p>No hay clientes registrados</p>
+              <a href="/clientes/nuevo" class="text-blue-600 hover:text-blue-500">
+                Agregar el primer cliente
+              </a>
+            </div>
+          `;
+          return;
+        }
+        
+        result.data.forEach(cliente => {
+          const clienteElement = document.createElement('div');
+          clienteElement.className = 'border border-gray-200 rounded-lg p-4 hover:bg-gray-50';
+          clienteElement.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <h4 class="text-sm font-medium text-gray-900">${cliente.nombre}</h4>
+                <p class="text-sm text-gray-500">${cliente.email || 'Sin email'}</p>
+                <p class="text-sm text-gray-500">${cliente.telefono || 'Sin teléfono'}</p>
+                ${cliente.direccion ? `<p class="text-xs text-gray-400 mt-1">${cliente.direccion}</p>` : ''}
+              </div>
+              <div class="flex space-x-2">
+                <a 
+                  href="/clientes/editar/${cliente.id}"
+                  class="text-blue-600 hover:text-blue-900 text-sm"
+                >
+                  ✏️ Editar
+                </a>
+                <button 
+                  onclick="eliminarCliente(${cliente.id})"
+                  class="text-red-600 hover:text-red-900 text-sm"
+                >
+                  🗑️ Eliminar
+                </button>
+              </div>
+            </div>
+          `;
+          lista.appendChild(clienteElement);
+        });
+      }
+    } catch (error) {
+      console.error('Error cargando clientes:', error);
+      document.getElementById('clientes-lista').innerHTML = `
+        <div class="text-center py-4 text-red-500">
+          Error cargando clientes. Inténtalo de nuevo.
+        </div>
+      `;
+    }
+  }
+
+  async function eliminarCliente(id) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este cliente?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/clientes/${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        cargarClientes(); // Recargar la lista
+      } else {
+        alert('Error al eliminar el cliente');
+      }
+    } catch (error) {
+      console.error('Error eliminando cliente:', error);
+      alert('Error al eliminar el cliente');
+    }
+  }
+
+  // Cargar clientes al cargar la página
+  document.addEventListener('DOMContentLoaded', cargarClientes);
+</script>

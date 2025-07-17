@@ -1,274 +1,233 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import MapaClientes from '../components/MapaClientes.astro';
+import Navigation from '../components/Navigation.astro';
 ---
 
-<Layout title="Mapa de Clientes">
-	<main>
-		<div class="container">
-			<header class="header">
-				<h1>🗺️ Mapa de Clientes</h1>
-				<div class="acciones-header">
-					<a href="/clientes/nuevo" class="btn-nuevo">
-						➕ Nuevo Cliente
-					</a>
-					<button onclick="agregarClienteEnMapa()" class="btn-mapa">
-						📍 Agregar en Mapa
-					</button>
-				</div>
-			</header>
+<Layout title="Dashboard - Gestión de Clientes">
+  <Navigation />
+  
+  <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="px-4 py-6 sm:px-0">
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <p class="mt-2 text-gray-600">
+          Resumen general de tu sistema de gestión de clientes y repartos
+        </p>
+      </div>
 
-			<div class="contenido">
-				<section class="seccion-mapa">
-					<h2>Ubicaciones de Clientes</h2>
-					<MapaClientes />
-				</section>
+      <!-- Estadísticas -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Clientes -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <span class="text-2xl">👥</span>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">
+                    Total Clientes
+                  </dt>
+                  <dd class="text-lg font-medium text-gray-900" id="total-clientes">
+                    Cargando...
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-5 py-3">
+            <div class="text-sm">
+              <a href="/clientes" class="font-medium text-indigo-600 hover:text-indigo-500">
+                Ver todos
+              </a>
+            </div>
+          </div>
+        </div>
 
-				<section class="seccion-lista">
-					<h2>Lista de Clientes</h2>
-					<div id="listaClientes" class="lista-clientes">
-						<div class="cargando">Cargando clientes...</div>
-					</div>
-				</section>
-			</div>
-		</div>
-	</main>
+        <!-- Camiones -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <span class="text-2xl">🚛</span>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">
+                    Total Camiones
+                  </dt>
+                  <dd class="text-lg font-medium text-gray-900" id="total-camiones">
+                    Cargando...
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-5 py-3">
+            <div class="text-sm">
+              <a href="/camiones" class="font-medium text-green-600 hover:text-green-500">
+                Ver todos
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Días de Entrega -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <span class="text-2xl">📅</span>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">
+                    Días Configurados
+                  </dt>
+                  <dd class="text-lg font-medium text-gray-900" id="total-dias">
+                    Cargando...
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-5 py-3">
+            <div class="text-sm">
+              <a href="/dias-entrega" class="font-medium text-purple-600 hover:text-purple-500">
+                Ver todos
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Repartos -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <span class="text-2xl">📦</span>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">
+                    Total Repartos
+                  </dt>
+                  <dd class="text-lg font-medium text-gray-900" id="total-repartos">
+                    Cargando...
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-5 py-3">
+            <div class="text-sm">
+              <a href="/repartos" class="font-medium text-indigo-600 hover:text-indigo-500">
+                Ver todos
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones Rápidas -->
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+            🚀 Acciones Rápidas
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <a
+              href="/clientes/nuevo"
+              class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              ➕ Nuevo Cliente
+            </a>
+            <button
+              id="btn-nuevo-camion"
+              class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              🚛 Nuevo Camión
+            </button>
+            <button
+              id="btn-nuevo-dia"
+              class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+            >
+              📅 Nuevo Día
+            </button>
+            <button
+              id="btn-nuevo-reparto"
+              class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+            >
+              📦 Nuevo Reparto
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
 </Layout>
 
-<style>
-	.container {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 20px;
-	}
-
-	.header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 30px;
-		padding-bottom: 20px;
-		border-bottom: 2px solid #e9ecef;
-	}
-
-	.header h1 {
-		color: #333;
-		margin: 0;
-		font-size: 2.5rem;
-	}
-
-	.acciones-header {
-		display: flex;
-		gap: 10px;
-	}
-
-	.btn-nuevo,
-	.btn-mapa {
-		background-color: #007bff;
-		color: white;
-		text-decoration: none;
-		padding: 12px 20px;
-		border-radius: 6px;
-		font-weight: bold;
-		transition: background-color 0.3s;
-		border: none;
-		cursor: pointer;
-		font-size: 14px;
-	}
-
-	.btn-nuevo:hover,
-	.btn-mapa:hover {
-		background-color: #0056b3;
-	}
-
-	.btn-mapa {
-		background-color: #28a745;
-	}
-
-	.btn-mapa:hover {
-		background-color: #218838;
-	}
-
-	.contenido {
-		display: grid;
-		grid-template-columns: 2fr 1fr;
-		gap: 30px;
-	}
-
-	.seccion-mapa,
-	.seccion-lista {
-		background: white;
-		padding: 20px;
-		border-radius: 8px;
-		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-	}
-
-	.seccion-mapa h2,
-	.seccion-lista h2 {
-		margin-top: 0;
-		color: #333;
-		border-bottom: 2px solid #f8f9fa;
-		padding-bottom: 10px;
-	}
-
-	.lista-clientes {
-		max-height: 500px;
-		overflow-y: auto;
-	}
-
-	.cliente-item {
-		border: 1px solid #e9ecef;
-		border-radius: 6px;
-		padding: 15px;
-		margin-bottom: 10px;
-		transition: box-shadow 0.3s;
-	}
-
-	.cliente-item:hover {
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-	}
-
-	.cliente-nombre {
-		font-weight: bold;
-		color: #007bff;
-		margin-bottom: 5px;
-		font-size: 1.1rem;
-	}
-
-	.cliente-info {
-		color: #666;
-		font-size: 0.9rem;
-		margin-bottom: 3px;
-	}
-
-	.cliente-acciones {
-		margin-top: 10px;
-		display: flex;
-		gap: 5px;
-	}
-
-	.btn-editar,
-	.btn-eliminar {
-		padding: 5px 10px;
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 12px;
-		text-decoration: none;
-		display: inline-block;
-	}
-
-	.btn-editar {
-		background-color: #ffc107;
-		color: #212529;
-	}
-
-	.btn-eliminar {
-		background-color: #dc3545;
-		color: white;
-	}
-
-	.btn-editar:hover {
-		background-color: #e0a800;
-	}
-
-	.btn-eliminar:hover {
-		background-color: #c82333;
-	}
-
-	.cargando {
-		text-align: center;
-		padding: 20px;
-		color: #666;
-		font-style: italic;
-	}
-
-	.sin-clientes {
-		text-align: center;
-		padding: 40px;
-		color: #666;
-	}
-
-	@media (max-width: 768px) {
-		.header {
-			flex-direction: column;
-			gap: 15px;
-			text-align: center;
-		}
-
-		.header h1 {
-			font-size: 2rem;
-		}
-
-		.contenido {
-			grid-template-columns: 1fr;
-		}
-
-		.acciones-header {
-			justify-content: center;
-		}
-	}
-</style>
-
 <script>
-	async function cargarListaClientes() {
-		try {
-			const response = await fetch('/api/clientes');
-			const result = await response.json();
+  async function cargarEstadisticas() {
+    try {
+      // Cargar clientes
+      const clientesResponse = await fetch('/api/clientes');
+      const clientesResult = await clientesResponse.json();
+      if (clientesResult.success) {
+        document.getElementById('total-clientes').textContent = 
+          clientesResult.data?.length || 0;
+      }
 
-			const container = document.getElementById('listaClientes');
+      // Cargar camiones
+      const camionesResponse = await fetch('/api/camiones');
+      const camionesResult = await camionesResponse.json();
+      if (camionesResult.success) {
+        document.getElementById('total-camiones').textContent = 
+          camionesResult.data?.length || 0;
+      }
 
-			if (result.success && result.data.length > 0) {
-				container.innerHTML = result.data.map(cliente => `
-					<div class="cliente-item">
-						<div class="cliente-nombre">${cliente.nombre}</div>
-						<div class="cliente-info">📧 ${cliente.email || 'No especificado'}</div>
-						<div class="cliente-info">📞 ${cliente.telefono || 'No especificado'}</div>
-						<div class="cliente-info">📍 ${cliente.direccion || 'No especificada'}</div>
-						${cliente.latitud && cliente.longitud ? 
-							`<div class="cliente-info">🌍 ${cliente.latitud.toFixed(4)}, ${cliente.longitud.toFixed(4)}</div>` : 
-							'<div class="cliente-info">🌍 Ubicación no especificada</div>'
-						}
-						<div class="cliente-acciones">
-							<a href="/clientes/editar/${cliente.id}" class="btn-editar">✏️ Editar</a>
-							<button onclick="eliminarClienteLista(${cliente.id})" class="btn-eliminar">🗑️ Eliminar</button>
-						</div>
-					</div>
-				`).join('');
-			} else {
-				container.innerHTML = '<div class="sin-clientes">No hay clientes registrados. ¡Agrega el primero!</div>';
-			}
-		} catch (error) {
-			console.error('Error cargando clientes:', error);
-			document.getElementById('listaClientes').innerHTML = 
-				'<div class="sin-clientes">Error cargando clientes. Intenta recargar la página.</div>';
-		}
-	}
+      // Cargar días
+      const diasResponse = await fetch('/api/dias-entrega');
+      const diasResult = await diasResponse.json();
+      if (diasResult.success) {
+        document.getElementById('total-dias').textContent = 
+          diasResult.data?.length || 0;
+      }
 
-	window.eliminarClienteLista = async function(id) {
-		if (confirm('¿Estás seguro de que quieres eliminar este cliente?')) {
-			try {
-				const response = await fetch(`/api/clientes/${id}`, {
-					method: 'DELETE'
-				});
-				const result = await response.json();
+      // Cargar repartos
+      const repartosResponse = await fetch('/api/repartos');
+      const repartosResult = await repartosResponse.json();
+      if (repartosResult.success) {
+        document.getElementById('total-repartos').textContent = 
+          repartosResult.data?.length || 0;
+      }
+    } catch (error) {
+      console.error('Error cargando estadísticas:', error);
+      // Mostrar error en las tarjetas
+      document.getElementById('total-clientes').textContent = 'Error';
+      document.getElementById('total-camiones').textContent = 'Error';
+      document.getElementById('total-dias').textContent = 'Error';
+      document.getElementById('total-repartos').textContent = 'Error';
+    }
+  }
 
-				if (result.success) {
-					alert('Cliente eliminado exitosamente');
-					await cargarListaClientes();
-					// Recargar el mapa también
-					if (window.cargarClientes) {
-						await window.cargarClientes();
-					}
-				} else {
-					alert('Error al eliminar cliente: ' + result.error);
-				}
-			} catch (error) {
-				alert('Error: ' + error.message);
-			}
-		}
-	};
-
-	// Cargar lista cuando se carga la página
-	document.addEventListener('DOMContentLoaded', cargarListaClientes);
+  // Event listeners
+  document.addEventListener('DOMContentLoaded', () => {
+    cargarEstadisticas();
+    
+    // Botones de acciones rápidas
+    document.getElementById('btn-nuevo-camion').addEventListener('click', () => {
+      window.location.href = '/camiones';
+    });
+    
+    document.getElementById('btn-nuevo-dia').addEventListener('click', () => {
+      window.location.href = '/dias-entrega';
+    });
+    
+    document.getElementById('btn-nuevo-reparto').addEventListener('click', () => {
+      window.location.href = '/repartos';
+    });
+  });
 </script>

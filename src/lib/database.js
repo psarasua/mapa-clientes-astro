@@ -30,7 +30,7 @@ export function initDB() {
   const database = getDB();
   
   try {
-    // Crear tabla de clientes
+    // Crear tabla de clientes simple
     database.exec(`
       CREATE TABLE IF NOT EXISTS clientes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,6 +49,26 @@ export function initDB() {
     database.exec(`
       CREATE INDEX IF NOT EXISTS idx_clientes_coordenadas 
       ON clientes (latitud, longitud)
+    `);
+
+    // Crear tabla de días de entrega
+    database.exec(`
+      CREATE TABLE IF NOT EXISTS diasEntrega (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        descripcion TEXT NOT NULL,
+        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+        fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Crear tabla de camiones
+    database.exec(`
+      CREATE TABLE IF NOT EXISTS camiones (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+        fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
     `);
 
     console.log('✅ Base de datos SQLite inicializada correctamente');
@@ -75,7 +95,11 @@ export function executeQuery(query, params = []) {
       
       // Para INSERT, devolver el registro insertado
       if (query.trim().toUpperCase().startsWith('INSERT')) {
-        const selectStmt = database.prepare('SELECT * FROM clientes WHERE id = ?');
+        let tableName = 'clientes'; // default
+        if (query.includes('diasEntrega')) tableName = 'diasEntrega';
+        if (query.includes('camiones')) tableName = 'camiones';
+        
+        const selectStmt = database.prepare(`SELECT * FROM ${tableName} WHERE id = ?`);
         const insertedRow = selectStmt.get(result.lastInsertRowid);
         return { rows: [insertedRow] };
       }
