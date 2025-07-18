@@ -1,0 +1,101 @@
+---
+import Menu from '../../components/Menu.astro';
+---
+<html lang="es">
+  <head>
+    <title>Repartos</title>
+  </head>
+  <body class="bg-gradient-to-b from-amber-50 via-orange-50 to-yellow-100 min-h-screen">
+    <Menu active="/repartos" />
+    <main class="max-w-2xl mx-auto py-4 px-2 sm:py-8 sm:px-0">
+      <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-orange-800">Repartos</h1>
+      <div id="repartos-list"></div>
+      <form id="form-repartos" class="bg-white/95 border border-orange-100 p-3 sm:p-4 rounded-xl shadow mt-6 sm:mt-8 flex flex-col gap-2">
+        <input name="camion_id" placeholder="ID Camión" type="number" class="border border-orange-200 p-2 rounded focus:ring-2 focus:ring-orange-300 transition" required />
+        <input name="dia_id" placeholder="ID Día" type="number" class="border border-orange-200 p-2 rounded focus:ring-2 focus:ring-orange-300 transition" required />
+        <input type="hidden" name="id" />
+        <button type="submit" class="bg-gradient-to-r from-orange-400 to-amber-500 text-white px-4 py-2 rounded font-semibold shadow hover:from-orange-500 hover:to-amber-600 transition">Guardar</button>
+        <button type="button" id="cancel-edit" class="hidden bg-gray-300 text-orange-900 px-4 py-2 rounded font-semibold hover:bg-gray-400 transition">Cancelar</button>
+      </form>
+      <script type="module">
+        let editingId = null;
+        async function fetchRepartos() {
+          const res = await fetch('/api/repartos');
+          const data = await res.json();
+          const list = document.getElementById('repartos-list');
+          list.innerHTML = data.map(r => `
+            <div class='bg-white/95 border border-orange-100 rounded-xl shadow p-3 sm:p-4 mb-2 flex flex-col sm:flex-row justify-between items-center gap-2'>
+              <div>
+                <div class='font-semibold text-orange-900'>Camión ID: ${r.camion_id}</div>
+                <div class='text-xs sm:text-sm text-orange-700'>Día ID: ${r.dia_id}</div>
+              </div>
+              <div class='flex gap-2'>
+                <button data-id='${r.id}' class='edit-btn text-orange-600 hover:underline font-semibold'>Editar</button>
+                <button data-id='${r.id}' class='delete-btn text-red-500 hover:underline font-semibold'>Eliminar</button>
+              </div>
+            </div>
+          `).join('');
+          document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.onclick = async () => {
+              await fetch('/api/repartos', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: btn.dataset.id })
+              });
+              fetchRepartos();
+            };
+          });
+          document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.onclick = () => {
+              const reparto = data.find(r => r.id == btn.dataset.id);
+              const form = document.getElementById('form-repartos');
+              form.camion_id.value = reparto.camion_id;
+              form.dia_id.value = reparto.dia_id;
+              form.id.value = reparto.id;
+              editingId = reparto.id;
+              form.querySelector('button[type="submit"]').textContent = 'Actualizar';
+              document.getElementById('cancel-edit').classList.remove('hidden');
+            };
+          });
+        }
+        fetchRepartos();
+        document.getElementById('form-repartos').onsubmit = async e => {
+          e.preventDefault();
+          const form = e.target;
+          if (editingId) {
+            await fetch('/api/repartos', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: editingId,
+                camion_id: Number(form.camion_id.value),
+                dia_id: Number(form.dia_id.value)
+              })
+            });
+          } else {
+            await fetch('/api/repartos', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                camion_id: Number(form.camion_id.value),
+                dia_id: Number(form.dia_id.value)
+              })
+            });
+          }
+          form.reset();
+          editingId = null;
+          form.querySelector('button[type="submit"]').textContent = 'Guardar';
+          document.getElementById('cancel-edit').classList.add('hidden');
+          fetchRepartos();
+        };
+        document.getElementById('cancel-edit').onclick = () => {
+          const form = document.getElementById('form-repartos');
+          form.reset();
+          editingId = null;
+          form.querySelector('button[type="submit"]').textContent = 'Guardar';
+          document.getElementById('cancel-edit').classList.add('hidden');
+        };
+      </script>
+    </main>
+  </body>
+</html>

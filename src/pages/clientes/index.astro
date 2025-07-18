@@ -1,0 +1,106 @@
+---
+import Menu from '../../components/Menu.astro';
+---
+<html lang="es">
+  <head>
+    <title>Clientes</title>
+  </head>
+  <body class="bg-gradient-to-b from-amber-50 via-orange-50 to-yellow-100 min-h-screen">
+    <Menu active="/clientes" />
+    <main class="max-w-2xl mx-auto py-4 px-2 sm:py-8 sm:px-0">
+      <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-orange-800">Clientes</h1>
+      <div id="clientes-list"></div>
+      <form id="form-clientes" class="bg-white/95 border border-orange-100 p-3 sm:p-4 rounded-xl shadow mt-6 sm:mt-8 flex flex-col gap-2">
+        <input name="nombre" placeholder="Nombre" class="border border-orange-200 p-2 rounded focus:ring-2 focus:ring-orange-300 transition" required />
+        <input name="direccion" placeholder="Dirección" class="border border-orange-200 p-2 rounded focus:ring-2 focus:ring-orange-300 transition" required />
+        <input name="telefono" placeholder="Teléfono" class="border border-orange-200 p-2 rounded focus:ring-2 focus:ring-orange-300 transition" required />
+        <input type="hidden" name="id" />
+        <button type="submit" class="bg-gradient-to-r from-orange-400 to-amber-500 text-white px-4 py-2 rounded font-semibold shadow hover:from-orange-500 hover:to-amber-600 transition">Guardar</button>
+        <button type="button" id="cancel-edit" class="hidden bg-gray-300 text-orange-900 px-4 py-2 rounded font-semibold hover:bg-gray-400 transition">Cancelar</button>
+      </form>
+      <script type="module">
+        let editingId = null;
+        async function fetchClientes() {
+          const res = await fetch('/api/clientes');
+          const data = await res.json();
+          const list = document.getElementById('clientes-list');
+          list.innerHTML = data.map(c => `
+            <div class='bg-white/95 border border-orange-100 rounded-xl shadow p-3 sm:p-4 mb-2 flex flex-col sm:flex-row justify-between items-center gap-2'>
+              <div>
+                <div class='font-semibold text-orange-900'>${c.nombre}</div>
+                <div class='text-xs sm:text-sm text-orange-700'>${c.direccion}</div>
+                <div class='text-xs sm:text-sm text-orange-700'>${c.telefono}</div>
+              </div>
+              <div class='flex gap-2'>
+                <button data-id='${c.id}' class='edit-btn text-orange-600 hover:underline font-semibold'>Editar</button>
+                <button data-id='${c.id}' class='delete-btn text-red-500 hover:underline font-semibold'>Eliminar</button>
+              </div>
+            </div>
+          `).join('');
+          document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.onclick = async () => {
+              await fetch('/api/clientes', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: btn.dataset.id })
+              });
+              fetchClientes();
+            };
+          });
+          document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.onclick = () => {
+              const cliente = data.find(c => c.id == btn.dataset.id);
+              const form = document.getElementById('form-clientes');
+              form.nombre.value = cliente.nombre;
+              form.direccion.value = cliente.direccion;
+              form.telefono.value = cliente.telefono;
+              form.id.value = cliente.id;
+              editingId = cliente.id;
+              form.querySelector('button[type="submit"]').textContent = 'Actualizar';
+              document.getElementById('cancel-edit').classList.remove('hidden');
+            };
+          });
+        }
+        fetchClientes();
+        document.getElementById('form-clientes').onsubmit = async e => {
+          e.preventDefault();
+          const form = e.target;
+          if (editingId) {
+            await fetch('/api/clientes', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: editingId,
+                nombre: form.nombre.value,
+                direccion: form.direccion.value,
+                telefono: form.telefono.value
+              })
+            });
+          } else {
+            await fetch('/api/clientes', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                nombre: form.nombre.value,
+                direccion: form.direccion.value,
+                telefono: form.telefono.value
+              })
+            });
+          }
+          form.reset();
+          editingId = null;
+          form.querySelector('button[type="submit"]').textContent = 'Guardar';
+          document.getElementById('cancel-edit').classList.add('hidden');
+          fetchClientes();
+        };
+        document.getElementById('cancel-edit').onclick = () => {
+          const form = document.getElementById('form-clientes');
+          form.reset();
+          editingId = null;
+          form.querySelector('button[type="submit"]').textContent = 'Guardar';
+          document.getElementById('cancel-edit').classList.add('hidden');
+        };
+      </script>
+    </main>
+  </body>
+</html>

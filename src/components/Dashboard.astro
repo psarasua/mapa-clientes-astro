@@ -1,0 +1,41 @@
+---
+import { getAllClientes } from '../db/clientes';
+import { getAllCamiones } from '../db/camiones';
+import { getAllDiasEntrega } from '../db/diasEntrega';
+import { getAllRepartos } from '../db/repartos';
+import { getAllClientesReparto } from '../db/clientesReparto';
+
+const clientes = getAllClientes();
+const camiones = getAllCamiones();
+const dias = getAllDiasEntrega();
+const repartos = getAllRepartos();
+const clientesReparto = getAllClientesReparto();
+
+const capacidadTotal = camiones.reduce((acc: number, c: { capacidad: number }) => acc + (Number(c.capacidad) || 0), 0);
+---
+<div class="mb-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+  <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
+    <span class="text-orange-600 text-xs sm:text-sm">Clientes</span>
+    <span class="text-xl sm:text-2xl font-bold text-orange-900">{clientes.length}</span>
+  </div>
+  <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
+    <span class="text-orange-600 text-xs sm:text-sm">Camiones</span>
+    <span class="text-xl sm:text-2xl font-bold text-orange-900">{camiones.length}</span>
+  </div>
+  <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
+    <span class="text-orange-600 text-xs sm:text-sm">Capacidad total</span>
+    <span class="text-xl sm:text-2xl font-bold text-orange-900">{capacidadTotal}</span>
+  </div>
+  <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
+    <span class="text-orange-600 text-xs sm:text-sm">Días de Entrega</span>
+    <span class="text-xl sm:text-2xl font-bold text-orange-900">{dias.length}</span>
+  </div>
+  <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
+    <span class="text-orange-600 text-xs sm:text-sm">Repartos</span>
+    <span class="text-xl sm:text-2xl font-bold text-orange-900">{repartos.length}</span>
+  </div>
+  <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
+    <span class="text-orange-600 text-xs sm:text-sm">Clientes Reparto</span>
+    <span class="text-xl sm:text-2xl font-bold text-orange-900">{clientesReparto.length}</span>
+  </div>
+</div>

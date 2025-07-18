@@ -1,0 +1,22 @@
+---
+const { active } = Astro.props;
+const links = [
+  { href: '/', label: 'Dashboard' },
+  { href: '/clientes', label: 'Clientes' },
+  { href: '/camiones', label: 'Camiones' },
+  { href: '/diasentrega', label: 'Días de Entrega' },
+  { href: '/repartos', label: 'Repartos' },
+  { href: '/clientesReparto', label: 'Clientes Reparto' },
+];
+---
+<nav class="bg-gradient-to-r from-orange-200 via-amber-100 to-yellow-100 shadow mb-6 sm:mb-8 rounded-b-xl">
+  <ul class="flex flex-wrap gap-2 sm:gap-4 px-2 sm:px-8 py-3 sm:py-4 justify-center font-semibold text-orange-800">
+    {links.map(link => (
+      <li>
+        <a href={link.href} class={['px-2 sm:px-4 py-1 rounded transition flex items-center gap-2 hover:bg-orange-100 hover:text-orange-900', active === link.href ? 'bg-orange-300/60 text-orange-900 shadow font-bold' : ''].join(' ')}>
+          <span>{link.label}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>

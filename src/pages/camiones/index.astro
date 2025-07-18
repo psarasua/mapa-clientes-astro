@@ -1,0 +1,78 @@
+---
+import Menu from '../../components/Menu.astro';
+---
+<html lang="es">
+  <head>
+    <title>Camiones</title>
+  </head>
+  <body class="bg-gradient-to-b from-amber-50 via-orange-50 to-yellow-100 min-h-screen">
+    <Menu active="/camiones" />
+    <main class="max-w-2xl mx-auto py-4 px-2 sm:py-8 sm:px-0">
+      <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-orange-800">Camiones</h1>
+      <div id="dashboard" class="mb-6 sm:mb-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+        <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
+          <span class="text-orange-600 text-xs sm:text-sm">Total de camiones</span>
+          <span id="total-camiones" class="text-xl sm:text-2xl font-bold text-orange-900">0</span>
+        </div>
+        <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
+          <span class="text-orange-600 text-xs sm:text-sm">Capacidad total</span>
+          <span id="capacidad-total" class="text-xl sm:text-2xl font-bold text-orange-900">0</span>
+        </div>
+      </div>
+      <div id="camiones-list"></div>
+      <form id="form-camiones" class="bg-white/95 border border-orange-100 p-3 sm:p-4 rounded-xl shadow mt-6 sm:mt-8 flex flex-col gap-2">
+        <input name="matricula" placeholder="Matrícula" class="border border-orange-200 p-2 rounded focus:ring-2 focus:ring-orange-300 transition" required />
+        <input name="modelo" placeholder="Modelo" class="border border-orange-200 p-2 rounded focus:ring-2 focus:ring-orange-300 transition" required />
+        <input name="capacidad" placeholder="Capacidad" type="number" class="border border-orange-200 p-2 rounded focus:ring-2 focus:ring-orange-300 transition" required />
+        <button type="submit" class="bg-gradient-to-r from-orange-400 to-amber-500 text-white px-4 py-2 rounded font-semibold shadow hover:from-orange-500 hover:to-amber-600 transition">Agregar</button>
+      </form>
+      <script type="module">
+        async function fetchCamiones() {
+          const res = await fetch('/api/camiones');
+          const data = await res.json();
+          // Dashboard
+          document.getElementById('total-camiones').textContent = data.length;
+          document.getElementById('capacidad-total').textContent = data.reduce((acc, c) => acc + (Number(c.capacidad) || 0), 0);
+          // Lista
+          const list = document.getElementById('camiones-list');
+          list.innerHTML = data.map(c => `
+            <div class='bg-white/95 border border-orange-100 rounded-xl shadow p-3 sm:p-4 mb-2 flex flex-col sm:flex-row justify-between items-center gap-2'>
+              <div>
+                <div class='font-semibold text-orange-900'>${c.matricula}</div>
+                <div class='text-xs sm:text-sm text-orange-700'>${c.modelo}</div>
+                <div class='text-xs sm:text-sm text-orange-700'>Capacidad: ${c.capacidad}</div>
+              </div>
+              <button data-id='${c.id}' class='delete-btn text-red-500 hover:underline font-semibold'>Eliminar</button>
+            </div>
+          `).join('');
+          document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.onclick = async () => {
+              await fetch('/api/camiones', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: btn.dataset.id })
+              });
+              fetchCamiones();
+            };
+          });
+        }
+        fetchCamiones();
+        document.getElementById('form-camiones').onsubmit = async e => {
+          e.preventDefault();
+          const form = e.target;
+          await fetch('/api/camiones', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              matricula: form.matricula.value,
+              modelo: form.modelo.value,
+              capacidad: Number(form.capacidad.value)
+            })
+          });
+          form.reset();
+          fetchCamiones();
+        };
+      </script>
+    </main>
+  </body>
+</html>

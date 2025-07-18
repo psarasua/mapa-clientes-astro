@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS repartos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  camion_id INTEGER NOT NULL,
+  dia_id INTEGER NOT NULL,
+  FOREIGN KEY(camion_id) REFERENCES camiones(id),
+  FOREIGN KEY(dia_id) REFERENCES diasEntrega(id)
+);

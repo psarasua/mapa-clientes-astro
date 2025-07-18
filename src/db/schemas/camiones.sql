@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS camiones (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  matricula TEXT NOT NULL,
+  modelo TEXT,
+  capacidad INTEGER
+);

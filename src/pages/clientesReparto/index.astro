@@ -1,0 +1,101 @@
+---
+import Menu from '../../components/Menu.astro';
+---
+<html lang="es">
+  <head>
+    <title>Clientes Reparto</title>
+  </head>
+  <body class="bg-gradient-to-b from-amber-50 via-orange-50 to-yellow-100 min-h-screen">
+    <Menu active="/clientesReparto" />
+    <main class="max-w-2xl mx-auto py-4 px-2 sm:py-8 sm:px-0">
+      <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-orange-800">Clientes Reparto</h1>
+      <div id="clientesreparto-list"></div>
+      <form id="form-clientesreparto" class="bg-white/95 border border-orange-100 p-3 sm:p-4 rounded-xl shadow mt-6 sm:mt-8 flex flex-col gap-2">
+        <input name="reparto_id" placeholder="ID Reparto" type="number" class="border border-orange-200 p-2 rounded focus:ring-2 focus:ring-orange-300 transition" required />
+        <input name="cliente_id" placeholder="ID Cliente" type="number" class="border border-orange-200 p-2 rounded focus:ring-2 focus:ring-orange-300 transition" required />
+        <input type="hidden" name="id" />
+        <button type="submit" class="bg-gradient-to-r from-orange-400 to-amber-500 text-white px-4 py-2 rounded font-semibold shadow hover:from-orange-500 hover:to-amber-600 transition">Guardar</button>
+        <button type="button" id="cancel-edit" class="hidden bg-gray-300 text-orange-900 px-4 py-2 rounded font-semibold hover:bg-gray-400 transition">Cancelar</button>
+      </form>
+      <script type="module">
+        let editingId = null;
+        async function fetchClientesReparto() {
+          const res = await fetch('/api/clientesReparto');
+          const data = await res.json();
+          const list = document.getElementById('clientesreparto-list');
+          list.innerHTML = data.map(r => `
+            <div class='bg-white/95 border border-orange-100 rounded-xl shadow p-3 sm:p-4 mb-2 flex flex-col sm:flex-row justify-between items-center gap-2'>
+              <div>
+                <div class='font-semibold text-orange-900'>Reparto ID: ${r.reparto_id}</div>
+                <div class='text-xs sm:text-sm text-orange-700'>Cliente ID: ${r.cliente_id}</div>
+              </div>
+              <div class='flex gap-2'>
+                <button data-id='${r.id}' class='edit-btn text-orange-600 hover:underline font-semibold'>Editar</button>
+                <button data-id='${r.id}' class='delete-btn text-red-500 hover:underline font-semibold'>Eliminar</button>
+              </div>
+            </div>
+          `).join('');
+          document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.onclick = async () => {
+              await fetch('/api/clientesReparto', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: btn.dataset.id })
+              });
+              fetchClientesReparto();
+            };
+          });
+          document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.onclick = () => {
+              const cr = data.find(r => r.id == btn.dataset.id);
+              const form = document.getElementById('form-clientesreparto');
+              form.reparto_id.value = cr.reparto_id;
+              form.cliente_id.value = cr.cliente_id;
+              form.id.value = cr.id;
+              editingId = cr.id;
+              form.querySelector('button[type="submit"]').textContent = 'Actualizar';
+              document.getElementById('cancel-edit').classList.remove('hidden');
+            };
+          });
+        }
+        fetchClientesReparto();
+        document.getElementById('form-clientesreparto').onsubmit = async e => {
+          e.preventDefault();
+          const form = e.target;
+          if (editingId) {
+            await fetch('/api/clientesReparto', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: editingId,
+                reparto_id: Number(form.reparto_id.value),
+                cliente_id: Number(form.cliente_id.value)
+              })
+            });
+          } else {
+            await fetch('/api/clientesReparto', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                reparto_id: Number(form.reparto_id.value),
+                cliente_id: Number(form.cliente_id.value)
+              })
+            });
+          }
+          form.reset();
+          editingId = null;
+          form.querySelector('button[type="submit"]').textContent = 'Guardar';
+          document.getElementById('cancel-edit').classList.add('hidden');
+          fetchClientesReparto();
+        };
+        document.getElementById('cancel-edit').onclick = () => {
+          const form = document.getElementById('form-clientesreparto');
+          form.reset();
+          editingId = null;
+          form.querySelector('button[type="submit"]').textContent = 'Guardar';
+          document.getElementById('cancel-edit').classList.add('hidden');
+        };
+      </script>
+    </main>
+  </body>
+</html>
