@@ -49,21 +49,40 @@ import Menu from '../../components/Menu.astro';
         document.getElementById('total-camiones').textContent = data.length;
         document.getElementById('capacidad-total').textContent = data.reduce((acc, c) => acc + (Number(c.capacidad) || 0), 0);
         const list = document.getElementById('camiones-list');
-        list.innerHTML = data.map(c => `
-          <div class='card mb-2 shadow-sm'>
-            <div class='card-body d-flex flex-column flex-md-row justify-content-between align-items-center'>
-              <div>
-                <div class='fw-semibold text-primary'>${c.matricula}</div>
-                <div class='text-muted small'>${c.modelo}</div>
-                <div class='text-muted small'>Capacidad: ${c.capacidad}</div>
-              </div>
-              <button data-id='${c.id}' class='delete-btn btn btn-outline-danger btn-sm mt-2 mt-md-0'>
-                <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='#dc3545' viewBox='0 0 16 16'><path d='M5.5 5.5A.5.5 0 0 1 6 5h4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5v-7zM4.118 4 4 4.059V13.5A1.5 1.5 0 0 0 5.5 15h5A1.5 1.5 0 0 0 12 13.5V4.059L11.882 4H4.118zM2.5 3a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1H15a.5.5 0 0 1 0 1h-1v10.5A2.5 2.5 0 0 1 11.5 17h-7A2.5 2.5 0 0 1 2 14.5V4H1a.5.5 0 0 1 0-1h1.5z'/></svg>
-                Eliminar
-              </button>
-            </div>
+        if (data.length === 0) {
+          list.innerHTML = `<div class='alert alert-info text-center'>No hay camiones registrados.</div>`;
+          return;
+        }
+        list.innerHTML = `
+          <div class="table-responsive">
+            <table class="table table-striped align-middle">
+              <thead class="table-primary">
+                <tr>
+                  <th>Matrícula</th>
+                  <th>Modelo</th>
+                  <th>Capacidad</th>
+                  <th class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.map(c => `
+                  <tr>
+                    <td class="fw-semibold text-primary">${c.matricula}</td>
+                    <td>${c.modelo}</td>
+                    <td>${c.capacidad}</td>
+                    <td class="text-center">
+                      <div class="d-flex gap-2 justify-content-center">
+                        <button data-id='${c.id}' class='delete-btn btn btn-outline-danger btn-sm' title="Eliminar">
+                          <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='#dc3545' viewBox='0 0 16 16'><path d='M5.5 5.5A.5.5 0 0 1 6 5h4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5v-7zM4.118 4 4 4.059V13.5A1.5 1.5 0 0 0 5.5 15h5A1.5 1.5 0 0 0 12 13.5V4.059L11.882 4H4.118zM2.5 3a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1H15a.5.5 0 0 1 0 1h-1v10.5A2.5 2.5 0 0 1 11.5 17h-7A2.5 2.5 0 0 1 2 14.5V4H1a.5.5 0 0 1 0-1h1.5z'/></svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
           </div>
-        `).join('');
+        `;
         document.querySelectorAll('.delete-btn').forEach(btn => {
           btn.onclick = async () => {
             await fetch('/api/camiones', {
