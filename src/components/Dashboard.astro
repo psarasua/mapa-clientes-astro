@@ -13,29 +13,55 @@ const clientesReparto = getAllClientesReparto();
 
 const capacidadTotal = camiones.reduce((acc: number, c: { capacidad: number }) => acc + (Number(c.capacidad) || 0), 0);
 ---
-<div class="mb-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-  <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
-    <span class="text-orange-600 text-xs sm:text-sm">Clientes</span>
-    <span class="text-xl sm:text-2xl font-bold text-orange-900">{clientes.length}</span>
-  </div>
-  <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
-    <span class="text-orange-600 text-xs sm:text-sm">Camiones</span>
-    <span class="text-xl sm:text-2xl font-bold text-orange-900">{camiones.length}</span>
-  </div>
-  <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
-    <span class="text-orange-600 text-xs sm:text-sm">Capacidad total</span>
-    <span class="text-xl sm:text-2xl font-bold text-orange-900">{capacidadTotal}</span>
-  </div>
-  <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
-    <span class="text-orange-600 text-xs sm:text-sm">Días de Entrega</span>
-    <span class="text-xl sm:text-2xl font-bold text-orange-900">{dias.length}</span>
-  </div>
-  <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
-    <span class="text-orange-600 text-xs sm:text-sm">Repartos</span>
-    <span class="text-xl sm:text-2xl font-bold text-orange-900">{repartos.length}</span>
-  </div>
-  <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
-    <span class="text-orange-600 text-xs sm:text-sm">Clientes Reparto</span>
-    <span class="text-xl sm:text-2xl font-bold text-orange-900">{clientesReparto.length}</span>
+<div class="container mb-4">
+  <div class="row g-3">
+    <div class="col-12 col-md-4">
+      <div class="card text-center border-warning">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Clientes</h6>
+          <h3 class="card-title text-dark">{clientes.length}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="card text-center border-warning">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Camiones</h6>
+          <h3 class="card-title text-dark">{camiones.length}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="card text-center border-warning">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Capacidad total</h6>
+          <h3 class="card-title text-dark">{capacidadTotal}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="card text-center border-warning">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Días de Entrega</h6>
+          <h3 class="card-title text-dark">{dias.length}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="card text-center border-warning">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Repartos</h6>
+          <h3 class="card-title text-dark">{repartos.length}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="card text-center border-warning">
+        <div class="card-body">
+          <h6 class="card-subtitle mb-2 text-muted">Clientes Reparto</h6>
+          <h3 class="card-title text-dark">{clientesReparto.length}</h3>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

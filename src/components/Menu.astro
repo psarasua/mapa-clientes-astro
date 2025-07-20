@@ -1,22 +1,32 @@
 ---
 const { active } = Astro.props;
 const links = [
-  { href: '/', label: 'Dashboard' },
-  { href: '/clientes', label: 'Clientes' },
-  { href: '/camiones', label: 'Camiones' },
-  { href: '/diasentrega', label: 'Días de Entrega' },
-  { href: '/repartos', label: 'Repartos' },
-  { href: '/clientesReparto', label: 'Clientes Reparto' },
+  { href: '/', label: 'Dashboard', svg: `<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='#0dcaf0' viewBox='0 0 16 16'><path d='M8 4a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5H5a.5.5 0 0 1 0-1h2.5V4.5A.5.5 0 0 1 8 4z'/><path d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm0-1A7 7 0 1 1 8 1a7 7 0 0 1 0 14z'/></svg>` },
+  { href: '/clientes', label: 'Clientes', svg: `<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='#198754' viewBox='0 0 16 16'><path d='M13 7a3 3 0 1 0-6 0 3 3 0 0 0 6 0z'/><path d='M6 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0z'/><path d='M14 14s-1-1.5-6-1.5S2 14 2 14v1h12v-1z'/></svg>` },
+  { href: '/camiones', label: 'Camiones', svg: `<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='#ffc107' viewBox='0 0 16 16'><path d='M0 1.5A.5.5 0 0 1 .5 1h11a.5.5 0 0 1 .5.5V5h1.293a1 1 0 0 1 .707.293l2 2A1 1 0 0 1 16 8v5.5a.5.5 0 0 1-.5.5H15a2 2 0 1 1-4 0H5a2 2 0 1 1-4 0H.5a.5.5 0 0 1-.5-.5v-12zM1 2v11h1a2 2 0 1 1 4 0h6a2 2 0 1 1 4 0h1V8a1 1 0 0 0-.293-.707l-2-2A1 1 0 0 0 13.293 5H13V2H1zm12 6a1 1 0 1 0 2 0 1 1 0 0 0-2 0z'/></svg>` },
+  { href: '/diasentrega', label: 'Días de Entrega', svg: `<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='#0d6efd' viewBox='0 0 16 16'><path d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 3v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1h-1v.5a.5.5 0 0 1-1 0V2h-8v.5a.5.5 0 0 1-1 0V2H2a1 1 0 0 0-1 1zm2.5 3a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0v-5a.5.5 0 0 1 .5-.5zm3 0a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0v-5a.5.5 0 0 1 .5-.5zm3 0a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0v-5a.5.5 0 0 1 .5-.5z'/></svg>` },
+  { href: '/repartos', label: 'Repartos', svg: `<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='#dc3545' viewBox='0 0 16 16'><path d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm0 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1zm3.5 7a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 .5-.5zm-7 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 .5-.5zm3.5 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 .5-.5z'/></svg>` },
+  { href: '/clientesReparto', label: 'Clientes Reparto', svg: `<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='#6c757d' viewBox='0 0 16 16'><path d='M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'/></svg>` },
 ];
 ---
-<nav class="bg-gradient-to-r from-orange-200 via-amber-100 to-yellow-100 shadow mb-6 sm:mb-8 rounded-b-xl">
-  <ul class="flex flex-wrap gap-2 sm:gap-4 px-2 sm:px-8 py-3 sm:py-4 justify-center font-semibold text-orange-800">
-    {links.map(link => (
-      <li>
-        <a href={link.href} class={['px-2 sm:px-4 py-1 rounded transition flex items-center gap-2 hover:bg-orange-100 hover:text-orange-900', active === link.href ? 'bg-orange-300/60 text-orange-900 shadow font-bold' : ''].join(' ')}>
-          <span>{link.label}</span>
-        </a>
-      </li>
-    ))}
-  </ul>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="/">MapaClientes</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNavbar">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        {links.map(link => (
+          <li class="nav-item">
+            <a href={link.href} class={["nav-link d-flex align-items-center gap-2", active === link.href ? "active fw-bold" : ""].join(' ')} aria-current={active === link.href ? "page" : undefined}>
+              <span set:html={link.svg}></span>
+              <span>{link.label}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
 </nav>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>

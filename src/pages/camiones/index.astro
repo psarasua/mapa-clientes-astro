@@ -1,78 +1,97 @@
 ---
+import Layout from '../../layouts/Layout.astro';
 import Menu from '../../components/Menu.astro';
 ---
-<html lang="es">
-  <head>
-    <title>Camiones</title>
-  </head>
-  <body class="bg-gradient-to-b from-amber-50 via-orange-50 to-yellow-100 min-h-screen">
-    <Menu active="/camiones" />
-    <main class="max-w-2xl mx-auto py-4 px-2 sm:py-8 sm:px-0">
-      <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-orange-800">Camiones</h1>
-      <div id="dashboard" class="mb-6 sm:mb-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-        <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
-          <span class="text-orange-600 text-xs sm:text-sm">Total de camiones</span>
-          <span id="total-camiones" class="text-xl sm:text-2xl font-bold text-orange-900">0</span>
-        </div>
-        <div class="bg-white/90 border border-orange-100 rounded-xl shadow p-3 sm:p-4 flex flex-col items-center">
-          <span class="text-orange-600 text-xs sm:text-sm">Capacidad total</span>
-          <span id="capacidad-total" class="text-xl sm:text-2xl font-bold text-orange-900">0</span>
+<Layout>
+  <Menu active="/camiones" />
+  <main class="container py-4">
+    <h1 class="display-6 fw-bold mb-4 text-center text-primary">Camiones</h1>
+    <div id="dashboard" class="row mb-4 g-3 justify-content-center">
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card text-center border-primary">
+          <div class="card-body">
+            <span class="card-subtitle mb-2 text-muted">Total de camiones</span>
+            <h3 id="total-camiones" class="card-title text-primary">0</h3>
+          </div>
         </div>
       </div>
-      <div id="camiones-list"></div>
-      <form id="form-camiones" class="bg-white/95 border border-orange-100 p-3 sm:p-4 rounded-xl shadow mt-6 sm:mt-8 flex flex-col gap-2">
-        <input name="matricula" placeholder="Matrícula" class="border border-orange-200 p-2 rounded focus:ring-2 focus:ring-orange-300 transition" required />
-        <input name="modelo" placeholder="Modelo" class="border border-orange-200 p-2 rounded focus:ring-2 focus:ring-orange-300 transition" required />
-        <input name="capacidad" placeholder="Capacidad" type="number" class="border border-orange-200 p-2 rounded focus:ring-2 focus:ring-orange-300 transition" required />
-        <button type="submit" class="bg-gradient-to-r from-orange-400 to-amber-500 text-white px-4 py-2 rounded font-semibold shadow hover:from-orange-500 hover:to-amber-600 transition">Agregar</button>
-      </form>
-      <script type="module">
-        async function fetchCamiones() {
-          const res = await fetch('/api/camiones');
-          const data = await res.json();
-          // Dashboard
-          document.getElementById('total-camiones').textContent = data.length;
-          document.getElementById('capacidad-total').textContent = data.reduce((acc, c) => acc + (Number(c.capacidad) || 0), 0);
-          // Lista
-          const list = document.getElementById('camiones-list');
-          list.innerHTML = data.map(c => `
-            <div class='bg-white/95 border border-orange-100 rounded-xl shadow p-3 sm:p-4 mb-2 flex flex-col sm:flex-row justify-between items-center gap-2'>
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card text-center border-primary">
+          <div class="card-body">
+            <span class="card-subtitle mb-2 text-muted">Capacidad total</span>
+            <h3 id="capacidad-total" class="card-title text-primary">0</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="camiones-list"></div>
+    <form id="form-camiones" class="card p-4 shadow-sm mb-4">
+      <div class="mb-3">
+        <input name="matricula" placeholder="Matrícula" class="form-control" required />
+      </div>
+      <div class="mb-3">
+        <input name="modelo" placeholder="Modelo" class="form-control" required />
+      </div>
+      <div class="mb-3">
+        <input name="capacidad" placeholder="Capacidad" type="number" class="form-control" required />
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' viewBox='0 0 16 16'><path d='M8 1a.5.5 0 0 1 .5.5V7.5H14.5a.5.5 0 0 1 0 1H8.5V14.5a.5.5 0 0 1-1 0V8.5H1.5a.5.5 0 0 1 0-1H7.5V1.5A.5.5 0 0 1 8 1z'/></svg>
+          Agregar
+        </button>
+      </div>
+    </form>
+    <script type="module">
+      async function fetchCamiones() {
+        const res = await fetch('/api/camiones');
+        const data = await res.json();
+        document.getElementById('total-camiones').textContent = data.length;
+        document.getElementById('capacidad-total').textContent = data.reduce((acc, c) => acc + (Number(c.capacidad) || 0), 0);
+        const list = document.getElementById('camiones-list');
+        list.innerHTML = data.map(c => `
+          <div class='card mb-2 shadow-sm'>
+            <div class='card-body d-flex flex-column flex-md-row justify-content-between align-items-center'>
               <div>
-                <div class='font-semibold text-orange-900'>${c.matricula}</div>
-                <div class='text-xs sm:text-sm text-orange-700'>${c.modelo}</div>
-                <div class='text-xs sm:text-sm text-orange-700'>Capacidad: ${c.capacidad}</div>
+                <div class='fw-semibold text-primary'>${c.matricula}</div>
+                <div class='text-muted small'>${c.modelo}</div>
+                <div class='text-muted small'>Capacidad: ${c.capacidad}</div>
               </div>
-              <button data-id='${c.id}' class='delete-btn text-red-500 hover:underline font-semibold'>Eliminar</button>
+              <button data-id='${c.id}' class='delete-btn btn btn-outline-danger btn-sm mt-2 mt-md-0'>
+                <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='#dc3545' viewBox='0 0 16 16'><path d='M5.5 5.5A.5.5 0 0 1 6 5h4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5v-7zM4.118 4 4 4.059V13.5A1.5 1.5 0 0 0 5.5 15h5A1.5 1.5 0 0 0 12 13.5V4.059L11.882 4H4.118zM2.5 3a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1H15a.5.5 0 0 1 0 1h-1v10.5A2.5 2.5 0 0 1 11.5 17h-7A2.5 2.5 0 0 1 2 14.5V4H1a.5.5 0 0 1 0-1h1.5z'/></svg>
+                Eliminar
+              </button>
             </div>
-          `).join('');
-          document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.onclick = async () => {
-              await fetch('/api/camiones', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: btn.dataset.id })
-              });
-              fetchCamiones();
-            };
-          });
-        }
-        fetchCamiones();
-        document.getElementById('form-camiones').onsubmit = async e => {
-          e.preventDefault();
-          const form = e.target;
-          await fetch('/api/camiones', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              matricula: form.matricula.value,
-              modelo: form.modelo.value,
-              capacidad: Number(form.capacidad.value)
-            })
-          });
-          form.reset();
-          fetchCamiones();
+          </div>
+        `).join('');
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.onclick = async () => {
+            await fetch('/api/camiones', {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: btn.dataset.id })
+            });
+            fetchCamiones();
+          };
+        });
+      }
+      fetchCamiones();
+      document.getElementById('form-camiones').onsubmit = async e => {
+        e.preventDefault();
+        const form = e.target;
+        const body = {
+          matricula: form.matricula.value,
+          modelo: form.modelo.value,
+          capacidad: form.capacidad.value
         };
-      </script>
-    </main>
-  </body>
-</html>
+        await fetch('/api/camiones', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        form.reset();
+        fetchCamiones();
+      };
+    </script>
+  </main>
+</Layout>
