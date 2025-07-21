@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS clientes (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   nombre TEXT NOT NULL,
-  direccion TEXT,
-  telefono TEXT
+  direccion TEXT NOT NULL,
+  telefono TEXT NOT NULL
 );

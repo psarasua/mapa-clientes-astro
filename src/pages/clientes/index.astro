@@ -7,117 +7,220 @@ import Menu from '../../components/Menu.astro';
   <main class="container py-4">
     <h1 class="display-6 fw-bold mb-4 text-center text-primary">Clientes</h1>
     <div id="clientes-list"></div>
-    <form id="form-clientes" class="card p-4 shadow-sm mb-4">
-      <div class="mb-3">
-        <input name="nombre" placeholder="Nombre" class="form-control" required />
+    <!-- Modal para alta/edición de cliente -->
+    <div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <form id="form-clientes">
+            <div class="modal-header">
+              <h5 class="modal-title" id="clienteModalLabel">Cliente</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <input name="nombre" id="input-nombre" placeholder="Nombre" class="form-control" required minlength="3" />
+                <div class="invalid-feedback">El nombre debe tener al menos 3 letras.</div>
+              </div>
+              <div class="mb-3">
+                <input name="direccion" id="input-direccion" placeholder="Dirección" class="form-control" required />
+                <div class="invalid-feedback">La dirección es obligatoria.</div>
+              </div>
+              <div class="mb-3">
+                <input name="telefono" id="input-telefono" placeholder="Teléfono" class="form-control" required pattern="\\d{8,}" maxlength="15" />
+                <div class="invalid-feedback">El teléfono debe tener al menos 8 dígitos y solo números.</div>
+              </div>
+              <input type="hidden" name="id" />
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-success">
+                <span set:html="<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' viewBox='0 0 16 16'><path d='M8 1a.5.5 0 0 1 .5.5V7.5H14.5a.5.5 0 0 1 0 1H8.5V14.5a.5.5 0 0 1-1 0V8.5H1.5a.5.5 0 0 1 0-1H7.5V1.5A.5.5 0 0 1 8 1z'/></svg>"></span>
+                Guardar
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-      <div class="mb-3">
-        <input name="direccion" placeholder="Dirección" class="form-control" required />
-      </div>
-      <div class="mb-3">
-        <input name="telefono" placeholder="Teléfono" class="form-control" required />
-      </div>
-      <input type="hidden" name="id" />
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary">
-          <span set:html="<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' viewBox='0 0 16 16'><path d='M8 1a.5.5 0 0 1 .5.5V7.5H14.5a.5.5 0 0 1 0 1H8.5V14.5a.5.5 0 0 1-1 0V8.5H1.5a.5.5 0 0 1 0-1H7.5V1.5A.5.5 0 0 1 8 1z'/></svg>"></span>
-          Guardar
-        </button>
-        <button type="button" id="cancel-edit" class="btn btn-secondary d-none">Cancelar</button>
-      </div>
-    </form>
-    <script type="module">
-      let editingId = null;
-      async function fetchClientes() {
-        const res = await fetch('/api/clientes');
-        const data = await res.json();
-        const list = document.getElementById('clientes-list');
-        if (data.length === 0) {
-          list.innerHTML = `<div class='alert alert-info text-center'>No hay clientes registrados.</div>`;
-          return;
-        }
-        list.innerHTML = `
-          <div class="table-responsive">
-            <table class="table table-striped align-middle">
-              <thead class="table-primary">
-                <tr>
-                  <th>Nombre</th>
-                  <th>Dirección</th>
-                  <th>Teléfono</th>
-                  <th class="text-center">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${data.map(c => `
-                  <tr>
-                    <td class="fw-semibold text-primary">${c.nombre}</td>
-                    <td>${c.direccion}</td>
-                    <td>${c.telefono}</td>
-                    <td class="text-center">
-                      <div class="d-flex gap-2 justify-content-center">
-                        <button data-id='${c.id}' class='edit-btn btn btn-outline-primary btn-sm' title="Editar">
-                          <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='#0d6efd' viewBox='0 0 16 16'><path d='M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 3 10.707V13h2.293l7.5-7.5z'/></svg>
-                        </button>
-                        <button data-id='${c.id}' class='delete-btn btn btn-outline-danger btn-sm' title="Eliminar">
-                          <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='#dc3545' viewBox='0 0 16 16'><path d='M5.5 5.5A.5.5 0 0 1 6 5h4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5v-7zM4.118 4 4 4.059V13.5A1.5 1.5 0 0 0 5.5 15h5A1.5 1.5 0 0 0 12 13.5V4.059L11.882 4H4.118zM2.5 3a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1H15a.5.5 0 0 1 0 1h-1v10.5A2.5 2.5 0 0 1 11.5 17h-7A2.5 2.5 0 0 1 2 14.5V4H1a.5.5 0 0 1 0-1h1.5z'/></svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
+    </div>
+    <!-- Toasts Bootstrap -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+      <div id="toast-clientes" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body" id="toast-clientes-msg">
+            <!-- Mensaje dinámico -->
           </div>
-        `;
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-          btn.onclick = async () => {
-            await fetch('/api/clientes', {
-              method: 'DELETE',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ id: btn.dataset.id })
-            });
-            fetchClientes();
-          };
-        });
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-          btn.onclick = () => {
-            const c = data.find(x => x.id == btn.dataset.id);
-            const form = document.getElementById('form-clientes');
-            form.nombre.value = c.nombre;
-            form.direccion.value = c.direccion;
-            form.telefono.value = c.telefono;
-            form.id.value = c.id;
-            editingId = c.id;
-            form.querySelector('#cancel-edit').classList.remove('d-none');
-          };
-        });
-      }
-      fetchClientes();
-      document.getElementById('form-clientes').onsubmit = async e => {
-        e.preventDefault();
-        const form = e.target;
-        const body = {
-          nombre: form.nombre.value,
-          direccion: form.direccion.value,
-          telefono: form.telefono.value,
-          id: form.id.value || undefined
-        };
-        await fetch('/api/clientes', {
-          method: body.id ? 'PUT' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        form.reset();
-        editingId = null;
-        form.querySelector('#cancel-edit').classList.add('d-none');
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      import 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js';
+      document.addEventListener('DOMContentLoaded', () => {
+        let editingId = null;
+        let clienteModal = new bootstrap.Modal(document.getElementById('clienteModal'));
+        let clienteForm = document.getElementById('form-clientes');
+
+        async function fetchClientes() {
+          const res = await fetch('/api/clientes');
+          const data = await res.json();
+          const list = document.getElementById('clientes-list');
+          if (data.length === 0) {
+            list.innerHTML = `<div class='alert alert-info text-center'>No hay clientes registrados.</div>`;
+            return;
+          }
+          list.innerHTML = `
+            <div class="table-responsive">
+              <table class="table table-striped align-middle">
+                <thead class="table-primary">
+                  <tr>
+                    <th>Id</th>
+                    <th>Nombre</th>
+                    <th>Dirección</th>
+                    <th>Teléfono</th>
+                    <th class="text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${data.map(c => `
+                    <tr>
+                      <td>${c.id}</td>
+                      <td class="fw-semibold text-primary">${c.nombre}</td>
+                      <td>${c.direccion}</td>
+                      <td>${c.telefono}</td>
+                      <td class="text-center">
+                        <div class="d-flex gap-2 justify-content-center">
+                          <button data-id='${c.id}' class='edit-btn btn btn-outline-warning btn-sm' title="Editar">
+                            <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='#ffc107' viewBox='0 0 16 16'><path d='M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 3 10.707V13h2.293l7.5-7.5z'/></svg>
+                          </button>
+                          <button data-id='${c.id}' class='delete-btn btn btn-outline-danger btn-sm' title="Eliminar">
+                            <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='#dc3545' viewBox='0 0 16 16'><path d='M5.5 5.5A.5.5 0 0 1 6 5h4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5v-7zM4.118 4 4 4.059V13.5A1.5 1.5 0 0 0 5.5 15h5A1.5 1.5 0 0 0 12 13.5V4.059L11.882 4H4.118zM2.5 3a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1H15a.5.5 0 0 1 0 1h-1v10.5A2.5 2.5 0 0 1 11.5 17h-7A2.5 2.5 0 0 1 2 14.5V4H1a.5.5 0 0 1 0-1h1.5z'/></svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+          document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.onclick = async () => {
+              await fetch('/api/clientes', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: btn.dataset.id })
+              });
+              fetchClientes();
+            };
+          });
+          document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.onclick = () => {
+              const c = data.find(x => x.id == btn.dataset.id);
+              clienteForm.nombre.value = c.nombre;
+              clienteForm.direccion.value = c.direccion;
+              clienteForm.telefono.value = c.telefono;
+              clienteForm.id.value = c.id;
+              editingId = c.id;
+              document.getElementById('clienteModalLabel').textContent = 'Editar cliente';
+              clienteModal.show();
+            };
+          });
+        }
         fetchClientes();
-      };
-      document.getElementById('cancel-edit').onclick = () => {
-        const form = document.getElementById('form-clientes');
-        form.reset();
-        editingId = null;
-        form.querySelector('#cancel-edit').classList.add('d-none');
-      };
+
+        // Toast helpers
+        const toastEl = document.getElementById('toast-clientes');
+        const toastMsg = document.getElementById('toast-clientes-msg');
+        let toast;
+        function showToast(msg, success = true) {
+          toastEl.classList.remove('bg-success', 'bg-danger');
+          toastEl.classList.add(success ? 'bg-success' : 'bg-danger');
+          toastMsg.textContent = msg;
+          toast = new bootstrap.Toast(toastEl);
+          toast.show();
+        }
+
+        clienteForm.onsubmit = async e => {
+          e.preventDefault();
+          // Validaciones personalizadas
+          let valid = true;
+          const nombre = clienteForm.nombre.value.trim();
+          const direccion = clienteForm.direccion.value.trim();
+          const telefono = clienteForm.telefono.value.trim();
+          // Nombre: mínimo 3 letras
+          if (nombre.length < 3) {
+            valid = false;
+            clienteForm.nombre.classList.add('is-invalid');
+          } else {
+            clienteForm.nombre.classList.remove('is-invalid');
+          }
+          // Dirección: no vacía
+          if (direccion.length === 0) {
+            valid = false;
+            clienteForm.direccion.classList.add('is-invalid');
+          } else {
+            clienteForm.direccion.classList.remove('is-invalid');
+          }
+          // Teléfono: solo números, mínimo 8 dígitos
+          if (!/^\d{8,}$/.test(telefono)) {
+            valid = false;
+            clienteForm.telefono.classList.add('is-invalid');
+          } else {
+            clienteForm.telefono.classList.remove('is-invalid');
+          }
+          if (!valid) {
+            showToast('Completa todos los campos correctamente', false);
+            return;
+          }
+          const body = {
+            nombre,
+            direccion,
+            telefono,
+            id: clienteForm.id.value || undefined
+          };
+          try {
+            const res = await fetch('/api/clientes', {
+              method: body.id ? 'PUT' : 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body)
+            });
+            const result = await res.json();
+            if (result.success) {
+              showToast(body.id ? 'Cliente actualizado correctamente' : 'Cliente creado correctamente', true);
+              clienteForm.reset();
+              editingId = null;
+              clienteModal.hide();
+              setTimeout(() => {
+                document.querySelector('button.btn-success[onclick="nuevoCliente()"]')?.focus();
+              }, 500); // Espera a que termine la animación del modal
+              fetchClientes();
+            } else {
+              showToast(result.error || 'Ocurrió un error al guardar', false);
+            }
+          } catch (err) {
+            showToast('Error de red o servidor', false);
+          }
+        };
+        // Quitar error al escribir
+        ['nombre','direccion','telefono'].forEach(campo => {
+          const input = document.getElementById('input-' + campo);
+          input.addEventListener('input', () => {
+            input.classList.remove('is-invalid');
+          });
+        });
+        // Botón para nuevo cliente
+        window.nuevoCliente = () => {
+          clienteForm.reset();
+          editingId = null;
+          clienteForm.id.value = '';
+          document.getElementById('clienteModalLabel').textContent = 'Nuevo cliente';
+          clienteModal.show();
+        }
+      });
     </script>
+    <button class="btn btn-success mb-3" style="position:fixed;bottom:2rem;right:2rem;z-index:1050;" onclick="nuevoCliente()">
+      <svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='white' viewBox='0 0 16 16'><path d='M8 1a.5.5 0 0 1 .5.5V7.5H14.5a.5.5 0 0 1 0 1H8.5V14.5a.5.5 0 0 1-1 0V8.5H1.5a.5.5 0 0 1 0-1H7.5V1.5A.5.5 0 0 1 8 1z'/></svg>
+      Nuevo
+    </button>
   </main>
 </Layout>
