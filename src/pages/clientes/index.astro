@@ -51,6 +51,7 @@ import Menu from '../../components/Menu.astro';
           </div>
           <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
         </div>
+        <div class="d-flex justify-content-end gap-2 px-3 pb-2" id="toast-clientes-actions" style="display:none;"></div>
       </div>
     </div>
     <script type="module">
@@ -104,13 +105,26 @@ import Menu from '../../components/Menu.astro';
             </div>
           `;
           document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.onclick = async () => {
-              await fetch('/api/clientes', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: btn.dataset.id })
-              });
-              fetchClientes();
+            btn.onclick = () => {
+              showToast('¿Seguro que deseas eliminar este cliente?', false, [
+                {
+                  text: 'Sí',
+                  className: 'btn-danger',
+                  handler: async () => {
+                    await fetch('/api/clientes', {
+                      method: 'DELETE',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ id: btn.dataset.id })
+                    });
+                    fetchClientes();
+                  }
+                },
+                {
+                  text: 'No',
+                  className: 'btn-secondary',
+                  handler: () => {}
+                }
+              ]);
             };
           });
           document.querySelectorAll('.edit-btn').forEach(btn => {
@@ -123,6 +137,9 @@ import Menu from '../../components/Menu.astro';
               editingId = c.id;
               document.getElementById('clienteModalLabel').textContent = 'Editar cliente';
               clienteModal.show();
+              setTimeout(() => {
+                document.getElementById('input-nombre')?.focus();
+              }, 300); // Espera a que el modal esté visible
             };
           });
         }
@@ -131,11 +148,30 @@ import Menu from '../../components/Menu.astro';
         // Toast helpers
         const toastEl = document.getElementById('toast-clientes');
         const toastMsg = document.getElementById('toast-clientes-msg');
-        let toast;
-        function showToast(msg, success = true) {
+        const toastActions = document.getElementById('toast-clientes-actions');
+        function showToast(msg, success = true, actions = null) {
+          let toast;
           toastEl.classList.remove('bg-success', 'bg-danger');
           toastEl.classList.add(success ? 'bg-success' : 'bg-danger');
           toastMsg.textContent = msg;
+          if (actions && Array.isArray(actions)) {
+            toastActions.innerHTML = '';
+            actions.forEach(({text, handler, className}) => {
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'btn btn-sm ' + (className || 'btn-light');
+              btn.textContent = text;
+              btn.onclick = () => {
+                handler();
+                toast.hide();
+              };
+              toastActions.appendChild(btn);
+            });
+            toastActions.style.display = '';
+          } else {
+            toastActions.innerHTML = '';
+            toastActions.style.display = 'none';
+          }
           toast = new bootstrap.Toast(toastEl);
           toast.show();
         }
@@ -215,6 +251,9 @@ import Menu from '../../components/Menu.astro';
           clienteForm.id.value = '';
           document.getElementById('clienteModalLabel').textContent = 'Nuevo cliente';
           clienteModal.show();
+          setTimeout(() => {
+            document.getElementById('input-nombre')?.focus();
+          }, 300);
         }
       });
     </script>
