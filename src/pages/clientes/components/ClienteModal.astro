@@ -1,0 +1,85 @@
+---
+// Componente de modal para alta/edición de cliente
+const { cliente = {}, isEdit = false } = Astro.props;
+---
+<div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+<form id="form-clientes" on:submit="handleSubmit(event)">
+        <div class="modal-header">
+          <h5 class="modal-title" id="clienteModalLabel">{isEdit ? 'Editar cliente' : 'Nuevo cliente'}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3 position-relative">
+            <span class="position-absolute top-50 start-0 translate-middle-y ms-2 text-primary">
+              <!-- Icono usuario -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#0d6efd" viewBox="0 0 16 16"><path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+            </span>
+            <input name="nombre" id="input-nombre" placeholder="Nombre" class="form-control ps-5" required minlength="3" value={cliente.nombre || ''} />
+            <div class="invalid-feedback">El nombre debe tener al menos 3 letras.</div>
+          </div>
+          <div class="mb-3 position-relative">
+            <span class="position-absolute top-50 start-0 translate-middle-y ms-2 text-success">
+              <!-- Icono dirección -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#198754" viewBox="0 0 16 16"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
+            </span>
+            <input name="direccion" id="input-direccion" placeholder="Dirección" class="form-control ps-5" required value={cliente.direccion || ''} />
+            <div class="invalid-feedback">La dirección es obligatoria.</div>
+          </div>
+          <div class="mb-3 position-relative">
+            <span class="position-absolute top-50 start-0 translate-middle-y ms-2 text-warning">
+              <!-- Icono teléfono -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#ffc107" viewBox="0 0 16 16"><path d="M3.654 1.328a.678.678 0 0 1 1.018-.063l2.29 2.29c.329.329.445.81.302 1.234l-.547 1.64a.678.678 0 0 0 .145.67l2.457 2.457a.678.678 0 0 0 .67.145l1.64-.547a1.745 1.745 0 0 1 1.234.302l2.29 2.29a.678.678 0 0 1-.063 1.018l-2.013 1.51a2.745 2.745 0 0 1-2.89.326c-1.12-.56-2.68-2.12-3.24-3.24a2.745 2.745 0 0 1 .326-2.89l1.51-2.013z"/></svg>
+            </span>
+            <input name="telefono" id="input-telefono" placeholder="Teléfono" class="form-control ps-5" required pattern="\\d{8,}" maxlength="15" value={cliente.telefono || ''} />
+            <div class="invalid-feedback">El teléfono debe tener al menos 8 dígitos y solo números.</div>
+          </div>
+            <input type="hidden" name="id" value={cliente.id || ''} />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">
+            <span set:html="<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' viewBox='0 0 16 16'><path d='M8 1a.5.5 0 0 1 .5.5V7.5H14.5a.5.5 0 0 1 0 1H8.5V14.5a.5.5 0 0 1-1 0V8.5H1.5a.5.5 0 0 1 0-1H7.5V1.5A.5.5 0 0 1 8 1z'/></svg>"></span>
+<script type="module">
+  export function handleSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+    const nombre = form.nombre.value.trim();
+    const direccion = form.direccion.value.trim();
+    const telefono = form.telefono.value.trim();
+    const id = form.id.value || undefined;
+    // Validaciones personalizadas
+    let valid = true;
+    if (nombre.length < 3) {
+      form.nombre.classList.add('is-invalid');
+      valid = false;
+    } else {
+      form.nombre.classList.remove('is-invalid');
+    }
+    if (direccion.length === 0) {
+      form.direccion.classList.add('is-invalid');
+      valid = false;
+    } else {
+      form.direccion.classList.remove('is-invalid');
+    }
+    if (!/^\d{8,}$/.test(telefono)) {
+      form.telefono.classList.add('is-invalid');
+      valid = false;
+    } else {
+      form.telefono.classList.remove('is-invalid');
+    }
+    if (!valid) return;
+    // Emitir evento personalizado para el padre
+    const detail = { nombre, direccion, telefono, id };
+    const customEvent = new CustomEvent('cliente-submit', { detail, bubbles: true });
+    form.dispatchEvent(customEvent);
+  }
+</script>
+            Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
